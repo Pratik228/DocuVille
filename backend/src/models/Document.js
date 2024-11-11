@@ -36,6 +36,20 @@ const documentSchema = new mongoose.Schema(
       type: String,
       enum: ["MALE", "FEMALE", "OTHER"],
     },
+    verificationStatus: {
+      type: String,
+      enum: ["pending", "verified", "rejected"],
+      default: "pending",
+    },
+    adminNotes: {
+      type: String,
+      default: "",
+    },
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    verifiedAt: Date,
     documentImage: {
       type: String,
       required: true,
@@ -60,6 +74,7 @@ const documentSchema = new mongoose.Schema(
     viewCount: {
       type: Number,
       default: 0,
+      max: 5,
     },
     lastViewedAt: Date,
   },

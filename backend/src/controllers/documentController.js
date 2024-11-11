@@ -56,6 +56,7 @@ exports.uploadDocument = async (req, res) => {
         documentNumber: `XXXX${extractedData.documentNumber.slice(-4)}`,
         dateOfBirth: extractedData.dateOfBirth,
         gender: extractedData.gender,
+        verificationStatus: document.verificationStatus,
       },
     });
   } catch (error) {

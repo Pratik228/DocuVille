@@ -111,6 +111,7 @@ exports.login = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        isAdmin: user.isAdmin,
       },
     });
   } catch (error) {
