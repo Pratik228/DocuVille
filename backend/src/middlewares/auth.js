@@ -7,15 +7,30 @@ const auth = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({ error: "Authentication required" });
     }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({ _id: decoded.id });
+    const user = await User.findById(decoded.id);
 
     if (!user) {
       return res.status(401).json({ error: "Please authenticate" });
     }
-    req.user = user;
+
+    // Add debug logging
+    console.log("Auth User:", {
+      id: user._id,
+      isAdmin: user.isAdmin,
+      email: user.email,
+    });
+
+    req.user = {
+      id: user._id,
+      isAdmin: user.isAdmin,
+      email: user.email,
+    };
+
     next();
   } catch (error) {
+    console.error("Auth Error:", error);
     res.status(401).json({ error: "Please authenticate" });
   }
 };

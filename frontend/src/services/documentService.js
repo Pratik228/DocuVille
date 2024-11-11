@@ -46,18 +46,12 @@ const documentService = {
     if (!documentId) throw new Error("Document ID is required");
     if (!status) throw new Error("Status is required");
 
-    try {
-      const response = await api.patch(`/${documentId}/verify`, {
-        status,
-        notes,
-      });
-      return response;
-    } catch (error) {
-      if (error.response?.status === 403) {
-        throw new Error("Not authorized to verify documents");
-      }
-      throw error;
-    }
+    const response = await api.patch(`/${documentId}/verify`, {
+      status,
+      notes,
+    });
+
+    return response;
   },
 
   deleteDocument: (documentId) => {

@@ -2,7 +2,12 @@ import { useState } from "react";
 import DocumentCard from "./DocumentCard";
 import { FiSearch } from "react-icons/fi";
 
-const DocumentList = ({ documents = [] }) => {
+const DocumentList = ({
+  documents = [],
+  isAdmin = false,
+  showVerifyActions = false,
+  onVerifyClick,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredDocuments = documents?.filter((doc) => {
@@ -19,10 +24,8 @@ const DocumentList = ({ documents = [] }) => {
   });
 
   const getDocumentKey = (doc) => {
-    // Ensure we always have a unique key, even if _id is not available
     if (doc._id) return doc._id;
     if (doc.id) return doc.id;
-    // If neither _id nor id exists, create a unique key from the document data
     return `${doc.documentNumber}-${doc.createdAt}`;
   };
 
@@ -49,15 +52,15 @@ const DocumentList = ({ documents = [] }) => {
               : "No documents uploaded yet"}
           </div>
         ) : (
-          filteredDocuments.map((doc, index) => {
-            const key = getDocumentKey(doc);
-            if (!key) {
-              console.warn("Document without proper ID:", doc);
-              // Fallback key using index (not ideal but better than undefined)
-              return <DocumentCard key={`doc-${index}`} document={doc} />;
-            }
-            return <DocumentCard key={key} document={doc} />;
-          })
+          filteredDocuments.map((doc) => (
+            <DocumentCard
+              key={getDocumentKey(doc)}
+              document={doc}
+              isAdmin={isAdmin}
+              showVerifyActions={showVerifyActions}
+              onVerifyClick={onVerifyClick}
+            />
+          ))
         )}
       </div>
     </div>

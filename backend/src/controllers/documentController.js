@@ -74,36 +74,30 @@ exports.uploadDocument = async (req, res) => {
 
 exports.getDocuments = async (req, res) => {
   try {
-    const documents = await Document.find({ userId: req.user.id })
-      .select("-documentImage -extractedData")
-      .sort("-createdAt");
+    let documents;
+
+    // If user is admin, get all documents
+    if (req.user.isAdmin) {
+      documents = await Document.find()
+        .select("-documentImage -extractedData")
+        .sort("-createdAt");
+    } else {
+      // If regular user, get only their documents
+      documents = await Document.find({ userId: req.user.id })
+        .select("-documentImage -extractedData")
+        .sort("-createdAt");
+    }
+
+    // Mask document numbers
+    const maskedDocuments = documents.map((doc) => ({
+      ...doc.toObject(),
+      documentNumber: `XXXX${doc.documentNumber.slice(-4)}`,
+    }));
 
     res.json({
       success: true,
       count: documents.length,
-      data: documents,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: "Failed to fetch documents",
-      message: error.message,
-    });
-  }
-};
-
-exports.getDocuments = async (req, res) => {
-  try {
-    const documents = await Document.find({ userId: req.user.id })
-      .select("-documentImage -extractedData")
-      .sort("-createdAt");
-
-    res.json({
-      success: true,
-      count: documents.length,
-      data: documents.map((doc) => ({
-        ...doc.toObject(),
-        documentNumber: `XXXX${doc.documentNumber.slice(-4)}`,
-      })),
+      data: maskedDocuments,
     });
   } catch (error) {
     res.status(500).json({

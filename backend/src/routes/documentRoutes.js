@@ -3,6 +3,7 @@ const router = express.Router();
 const upload = require("../middlewares/upload");
 const documentController = require("../controllers/documentController");
 const { auth, isAdmin } = require("../middlewares/auth");
+const Document = require("../models/Document");
 
 router.use(auth);
 
@@ -19,15 +20,16 @@ router.delete("/:id", documentController.deleteDocument);
 
 router.patch("/:id/verify", [auth, isAdmin], async (req, res) => {
   try {
+    const { id } = req.params;
     const { status, notes } = req.body;
 
-    const document = await Document.findById(req.params.id);
+    const document = await Document.findById(id);
     if (!document) {
       return res.status(404).json({ error: "Document not found" });
     }
 
     document.verificationStatus = status;
-    document.adminNotes = notes;
+    document.adminNotes = notes || "";
     document.verifiedBy = req.user.id;
     document.verifiedAt = new Date();
 
@@ -36,10 +38,14 @@ router.patch("/:id/verify", [auth, isAdmin], async (req, res) => {
     res.json({
       success: true,
       message: `Document marked as ${status}`,
-      document,
+      document: document.toObject(),
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Verification error:", error);
+    res.status(500).json({
+      error: "Verification failed",
+      message: error.message,
+    });
   }
 });
 
