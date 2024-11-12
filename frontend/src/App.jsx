@@ -32,8 +32,6 @@ function App() {
             !user ? <RegisterForm /> : <Navigate to="/dashboard" replace />
           }
         />
-
-        {/* Protected Routes */}
         <Route element={<PrivateRoute />}>
           <Route
             path="/dashboard"
@@ -52,8 +50,6 @@ function App() {
             }
           />
         </Route>
-
-        {/* Default Route */}
         <Route
           path="/"
           element={

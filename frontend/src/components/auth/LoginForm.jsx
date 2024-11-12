@@ -1,4 +1,3 @@
-// src/components/auth/LoginForm.jsx
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
@@ -30,7 +29,7 @@ const LoginForm = () => {
           <Formik
             initialValues={{ email: "", password: "" }}
             validationSchema={LoginSchema}
-            onSubmit={async (values, { setSubmitting }) => {
+            onSubmit={async (values) => {
               try {
                 await dispatch(login(values)).unwrap();
                 navigate("/dashboard");

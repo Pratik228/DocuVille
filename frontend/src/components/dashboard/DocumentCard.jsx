@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -6,7 +7,7 @@ import {
   verifyDocument,
   getDocuments,
 } from "../../features/documents/documentSlice";
-import { FiEye, FiTrash2, FiCheckCircle, FiX } from "react-icons/fi";
+import { FiEye, FiTrash2, FiCheckCircle } from "react-icons/fi";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
 import DocumentView from "./DocumentView";
@@ -24,7 +25,7 @@ const AdminVerifyModal = ({ document, onClose }) => {
       toast.success(`Document marked as ${status}`);
       onClose();
     } catch (err) {
-      toast.error("Verification failed");
+      toast.error(`Verification failed: ${err.message}`);
     } finally {
       setIsVerifying(false);
     }

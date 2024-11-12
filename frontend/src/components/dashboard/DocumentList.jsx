@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import DocumentCard from "./DocumentCard";
 import { FiSearch } from "react-icons/fi";

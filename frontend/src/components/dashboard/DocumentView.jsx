@@ -1,9 +1,9 @@
-// src/components/dashboard/DocumentView.jsx
+/* eslint-disable react/prop-types */
 import { useState, useEffect, useCallback } from "react";
 import { FiClock, FiEye, FiEyeOff } from "react-icons/fi";
 import { format } from "date-fns";
 
-const DocumentView = ({ document, viewToken, onClose }) => {
+const DocumentView = ({ document, onClose }) => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isBlurred, setIsBlurred] = useState(true);
   const [showWarning, setShowWarning] = useState(false);
@@ -46,7 +46,6 @@ const DocumentView = ({ document, viewToken, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-base-100 rounded-lg w-full max-w-2xl">
-        {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
           <h3 className="text-lg font-semibold">Document Details</h3>
           <div className="flex items-center gap-4">
@@ -67,10 +66,7 @@ const DocumentView = ({ document, viewToken, onClose }) => {
             </button>
           </div>
         </div>
-
-        {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Document details grid */}
           <div
             className={`grid grid-cols-2 gap-6 ${isBlurred ? "blur-md" : ""}`}
           >
@@ -111,8 +107,6 @@ const DocumentView = ({ document, viewToken, onClose }) => {
               </p>
             </div>
           </div>
-
-          {/* Document Image */}
           {document.documentImage && (
             <div
               className={`relative aspect-[3/4] bg-base-200 rounded-lg overflow-hidden ${
@@ -126,8 +120,6 @@ const DocumentView = ({ document, viewToken, onClose }) => {
               />
             </div>
           )}
-
-          {/* Extracted Data */}
           {document.extractedData &&
             Object.keys(document.extractedData).length > 0 && (
               <div className={isBlurred ? "blur-md" : ""}>
@@ -140,8 +132,6 @@ const DocumentView = ({ document, viewToken, onClose }) => {
               </div>
             )}
         </div>
-
-        {/* Warning Toast */}
         {showWarning && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
             <div className="alert alert-warning shadow-lg">

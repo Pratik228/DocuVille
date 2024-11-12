@@ -17,11 +17,6 @@ async function initializeTransporter() {
         pass: testAccount.pass,
       },
     });
-
-    console.log("Ethereal Email Credentials:", {
-      user: testAccount.user,
-      pass: testAccount.pass,
-    });
   } catch (error) {
     console.error("Failed to create test account:", error);
   }

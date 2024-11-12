@@ -26,7 +26,6 @@ const documentService = {
 
   getDocuments: async () => {
     const response = await api.get("/");
-    // If the response has a data property and it's an array, use it
     return Array.isArray(response.data) ? response.data : response;
   },
 

@@ -1,4 +1,3 @@
-// src/utils/axios.js
 import axios from "axios";
 
 const api = axios.create({
@@ -6,10 +5,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Add Cookie to requests if it exists
     const user = localStorage.getItem("user");
     if (user) {
       config.headers.Authorization = `Bearer ${JSON.parse(user).token}`;
@@ -21,7 +18,6 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {

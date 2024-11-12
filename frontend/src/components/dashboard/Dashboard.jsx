@@ -1,4 +1,3 @@
-// src/components/dashboard/Dashboard.jsx
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getDocuments } from "../../features/documents/documentSlice";
@@ -18,10 +17,12 @@ const Dashboard = () => {
   // Calculate document statistics
   const stats = {
     total: documents?.length || 0,
-    pending: documents?.filter((doc) => doc?.verificationStatus === "pending")
-      ?.length || 0,
-    verified: documents.filter((doc) => doc.verificationStatus === "verified")
-      ?.length||0,
+    pending:
+      documents?.filter((doc) => doc?.verificationStatus === "pending")
+        ?.length || 0,
+    verified:
+      documents.filter((doc) => doc.verificationStatus === "verified")
+        ?.length || 0,
   };
 
   return (
@@ -67,10 +68,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Upload Section */}
           <div className="lg:col-span-2">
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">

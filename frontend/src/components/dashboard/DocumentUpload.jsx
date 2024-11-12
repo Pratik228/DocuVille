@@ -47,7 +47,8 @@ const DocumentUpload = () => {
     formData.append("documentType", "aadharId");
 
     try {
-      const result = await dispatch(uploadDocument(formData)).unwrap();
+      // const result = await dispatch(uploadDocument(formData)).unwrap();
+      await dispatch(uploadDocument(formData)).unwrap();
       toast.success("Document uploaded successfully");
       setFile(null);
       setPreview(null);

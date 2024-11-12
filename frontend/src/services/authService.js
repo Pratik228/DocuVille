@@ -2,13 +2,13 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "http://localhost:8000/api",
-  withCredentials: true, // This is crucial for cookie handling
+  withCredentials: true,
 });
 
 const authService = {
   login: async (credentials) => {
     const response = await api.post("/auth/login", credentials);
-    return response.data.user; // Backend sends user data without token
+    return response.data.user;
   },
 
   register: async (userData) => {
@@ -27,7 +27,6 @@ const authService = {
   },
 };
 
-// Add response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
