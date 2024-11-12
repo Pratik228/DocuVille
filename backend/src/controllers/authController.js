@@ -90,14 +90,16 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: "Please verify your email first" });
     }
 
-    // Generate token
     const token = user.generateAuthToken();
 
+    // Updated cookie settings
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true, // Always true for production
+      sameSite: "none", // Required for cross-site
       maxAge: 24 * 60 * 60 * 1000,
+      domain:
+        process.env.NODE_ENV === "production" ? ".onrender.com" : "localhost",
     });
 
     res.json({
@@ -107,9 +109,11 @@ exports.login = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         isAdmin: user.isAdmin,
+        token, // Include token in response
       },
     });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(400).json({ error: error.message });
   }
 };

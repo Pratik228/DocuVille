@@ -1,8 +1,11 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "https://docuverify-backend.onrender.com/api", // Hardcode for now to test
   withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 api.interceptors.request.use(
@@ -11,9 +14,11 @@ api.interceptors.request.use(
     if (user) {
       config.headers.Authorization = `Bearer ${JSON.parse(user).token}`;
     }
+    console.log("Request Config:", config); // Debug log
     return config;
   },
   (error) => {
+    console.error("Request Error:", error);
     return Promise.reject(error);
   }
 );
@@ -21,8 +26,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error("Response Error:", error.response || error);
     if (error.response?.status === 401) {
-      // Clear user data and redirect to login
       localStorage.removeItem("user");
       window.location.href = "/login";
     }

@@ -15,13 +15,21 @@ app.use(cookieParser());
 connectDB();
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || "https://docu-verify.vercel.app",
+  origin: ["https://docu-verify.vercel.app", "http://localhost:5173"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["set-cookie"],
 };
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Handle preflight
+
+// Log CORS settings
+console.log("CORS Settings:", {
+  origin: corsOptions.origin,
+  credentials: corsOptions.credentials,
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
