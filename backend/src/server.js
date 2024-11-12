@@ -1,10 +1,11 @@
 const express = require("express");
-const dotenv = require("dotenv");
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 const cors = require("cors");
 const connectDB = require("./config/db");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-dotenv.config();
 const authRoutes = require("./routes/authRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 
@@ -13,40 +14,50 @@ app.use(cookieParser());
 
 connectDB();
 
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Your frontend URL
-    credentials: true, // Important for cookies
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || "https://docu-verify.vercel.app",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+const uploadsPath =
+  process.env.NODE_ENV === "production"
+    ? "/opt/render/project/src/uploads"
+    : path.join(__dirname, "../uploads");
 
-app.use("/api/auth", authRoutes);
-app.use("/api/docs", documentRoutes);
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: "Something went wrong!",
-    message: err.message,
-  });
-});
-
-app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
-});
+app.use("/uploads", express.static(uploadsPath));
 
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "healthy",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    env: process.env.NODE_ENV,
   });
+});
+
+app.use("/api/auth", authRoutes);
+app.use("/api/docs", documentRoutes);
+
+app.use((err, req, res, next) => {
+  console.error("Error:", err.stack);
+  res.status(500).json({
+    error: "Something went wrong!",
+    message:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "Internal Server Error",
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
 });
 
 const PORT = process.env.PORT || 8000;
@@ -57,4 +68,6 @@ app.listen(PORT, () => {
       process.env.NODE_ENV || "development"
     } mode on port ${PORT}`
   );
+  console.log("CORS Origin:", corsOptions.origin);
+  console.log("Uploads Path:", uploadsPath);
 });
