@@ -4,43 +4,24 @@ const { validateDocument } = require("../utils/validation");
 const encryption = require("../utils/encryption");
 const jwt = require("jsonwebtoken");
 const fs = require("fs").promises;
+const { upload } = require("../utils/cloudinary");
 
 exports.uploadDocument = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-
     const { data: extractedData } = await extractData(req.file.path);
-    console.log("Extracted data:", extractedData);
-
-    // Find document number in text
-    // Find document number in text
-    let documentNumber = extractedData.documentNumber;
-    if (!documentNumber && extractedData) {
-      const numbersInText = extractedData?.documentNumber?.match(/\d+/g) || [];
-      documentNumber =
-        numbersInText.find((num) => num.length >= 8) || "UNKNOWN-DOC";
-    }
-
-    console.log("Original doc number:", documentNumber); // Debug log
-
-    // Encrypt the document number
-    const encryptedDocNumber = encryption.encrypt(documentNumber);
-    console.log("Encrypted doc number:", encryptedDocNumber); // Debug log
 
     const document = new Document({
       userId: req.user.id,
       documentType: "aadharId",
       name: extractedData.name,
-      documentNumber: encryptedDocNumber, // Store encrypted version
+      documentNumber: documentNumber || "UNKNOWN-DOC",
       dateOfBirth: extractedData.dateOfBirth || extractedData.yearOfBirth,
       gender: extractedData.gender,
-      documentImage: req.file.path,
-      extractedData: {
-        ...extractedData,
-        documentNumber: documentNumber, // Store original in extracted data
-      },
+      documentImage: req.file.path, // This will be the Cloudinary URL
+      extractedData: extractedData,
       metadata: {
         originalFileName: req.file.originalname,
         fileSize: req.file.size,
@@ -50,25 +31,19 @@ exports.uploadDocument = async (req, res) => {
 
     await document.save();
 
-    // Use masked version for response
-    const maskedNumber = encryption.mask(documentNumber);
-
     res.status(201).json({
       success: true,
       message: "Document uploaded and processed successfully",
       document: {
         id: document._id,
         name: document.name,
-        documentNumber: maskedNumber,
+        documentNumber: `XXXX${document.documentNumber.slice(-4)}`,
         dateOfBirth: document.dateOfBirth,
         gender: document.gender,
         verificationStatus: document.verificationStatus,
       },
     });
   } catch (error) {
-    if (req.file) {
-      await fs.unlink(req.file.path).catch(console.error);
-    }
     console.error("Upload error:", error);
     res.status(500).json({
       error: "Document upload failed",
