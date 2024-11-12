@@ -95,7 +95,7 @@ const RegisterForm = () => {
                   try {
                     setIsLoading(true);
                     const response = await axios.post(
-                      "http://localhost:8000/api/auth/register",
+                      `${import.meta.env.VITE_API_URL}/api/auth/register`,
                       values
                     );
                     setVerificationSent(true);
