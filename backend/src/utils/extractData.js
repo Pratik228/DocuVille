@@ -9,35 +9,44 @@ const extractData = async (imagePath) => {
       .normalize()
       .toBuffer();
 
-    const result = await tesseract.recognize(processedImage, "eng", {
+    const result = await tesseract.recognize(processedImage, "eng+hin", {
       logger: (m) => console.log(m),
     });
 
     const text = result.data.text;
     console.log("Extracted text:", text);
 
-    // Generic patterns for Aadhar
+    // Enhanced patterns for Aadhar
     const patterns = {
       documentNumber: /(\d{4}\s?\d{4}\s?\d{4})/,
       vid: /VID\s*:\s*(\d{4}\s?\d{4}\s?\d{4}\s?\d{4})/,
       name: [
-        // Match any three-word name
+        // Match names in both English and Hindi
         /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})/,
-        // Name before DOB
-        /([A-Za-z\s]+?)(?=\s*(?:जन्म|DOB))/i,
-        // Name between start of line and colon
+        /नाम\s*\/\s*Name\s*:\s*([A-Za-z\s]+)/i,
+        /([A-Za-z\s]+?)(?=\s*(?:जन्म|DOB|Year of Birth))/i,
         /^([A-Za-z\s]+?)(?=:)/m,
-        // Any capitalized words together
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/,
       ],
       dateOfBirth: [
+        // Full date patterns
         /(?:जन्म तिथि|DOB)[:\s]*(\d{2}\/\d{2}\/\d{4})/i,
         /(\d{2}\/\d{2}\/\d{4})/,
+        // Year only patterns
+        /(?:Year of Birth|जन्म वर्ष)[:\s]*(\d{4})/i,
+        /[:\s](\d{4})(?=\s*(?:महिला|FEMALE|पुरुष|MALE))/,
       ],
-      gender: /(?:MALE|FEMALE|पुरुष|महिला)/i,
+      yearOfBirth: [
+        /(?:Year of Birth|जन्म वर्ष)[:\s]*(\d{4})/i,
+        /[:\s](\d{4})(?=\s*(?:महिला|FEMALE|पुरुष|MALE))/,
+      ],
+      gender: [
+        /(?:MALE|FEMALE|पुरुष|महिला)/i,
+        /(?:लिंग|Gender)[:\s]*(MALE|FEMALE|पुरुष|महिला)/i,
+      ],
     };
 
     const extracted = {};
+
     const tryPatterns = (patterns, text) => {
       if (!Array.isArray(patterns)) patterns = [patterns];
       for (const pattern of patterns) {
@@ -51,6 +60,8 @@ const extractData = async (imagePath) => {
       }
       return null;
     };
+
+    // Extract all fields
     for (const [key, regex] of Object.entries(patterns)) {
       const value = tryPatterns(regex, text);
       if (value) {
@@ -58,27 +69,31 @@ const extractData = async (imagePath) => {
         console.log(`${key} match:`, value.trim());
       }
     }
-    if (!extracted.name) {
-      const nameLines = text
-        .split("\n")
-        .map((line) => line.trim())
-        .filter((line) => /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+$/.test(line));
 
-      if (nameLines.length > 0) {
-        extracted.name = nameLines.reduce((a, b) =>
-          a.length > b.length ? a : b
-        );
-      }
+    // Handle year-only birth dates
+    if (!extracted.dateOfBirth && extracted.yearOfBirth) {
+      extracted.dateOfBirth = extracted.yearOfBirth;
     }
 
+    // Normalize gender
+    if (extracted.gender) {
+      const genderMap = {
+        पुरुष: "MALE",
+        महिला: "FEMALE",
+        male: "MALE",
+        female: "FEMALE",
+      };
+      extracted.gender =
+        genderMap[extracted.gender.toLowerCase()] ||
+        extracted.gender.toUpperCase();
+    }
+
+    // Clean up name
     if (extracted.name) {
       extracted.name = extracted.name
         .replace(/[^\w\s]/g, "")
         .replace(/\s+/g, " ")
-        .trim();
-
-      // Proper capitalization
-      extracted.name = extracted.name
+        .trim()
         .split(" ")
         .map(
           (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
@@ -94,9 +109,7 @@ const extractData = async (imagePath) => {
     };
   } catch (error) {
     console.error("Extraction error:", error);
-    throw new Error(
-      `Failed to extract data from Aadhar card: ${error.message}`
-    );
+    throw new Error(`Failed to extract data: ${error.message}`);
   }
 };
 

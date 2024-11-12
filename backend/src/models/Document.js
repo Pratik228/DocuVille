@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const encryption = require("../utils/encryption");
 
 const documentSchema = new mongoose.Schema(
   {
@@ -15,26 +16,23 @@ const documentSchema = new mongoose.Schema(
     documentNumber: {
       type: String,
       required: true,
+      set: function (number) {
+        if (!number) return number;
+        // Store encrypted version
+        return encryption.encrypt(number);
+      },
     },
     name: {
       type: String,
       required: true,
     },
     dateOfBirth: {
-      type: Date,
-      required: true,
-      set: (v) => {
-        // Handle DD/MM/YYYY format
-        if (typeof v === "string") {
-          const [day, month, year] = v.split("/");
-          return new Date(year, month - 1, day);
-        }
-        return v;
-      },
+      type: String,
+      required: false,
     },
     gender: {
       type: String,
-      enum: ["MALE", "FEMALE", "OTHER"],
+      enum: ["MALE", "FEMALE", "OTHER", "महिला", "पुरुष"],
     },
     verificationStatus: {
       type: String,
@@ -80,5 +78,32 @@ const documentSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+documentSchema.virtual("maskedDocumentNumber").get(function () {
+  if (!this.documentNumber) return "";
+  return encryption.mask(encryption.decrypt(this.documentNumber));
+});
+
+// Method to get decrypted document number
+documentSchema.methods.getDecryptedDocumentNumber = function () {
+  return encryption.decrypt(this.documentNumber);
+};
+documentSchema.pre("save", function (next) {
+  // Clean document number (remove spaces)
+  if (this.documentNumber) {
+    this.documentNumber = this.documentNumber.replace(/\s+/g, "");
+  }
+
+  // Normalize gender
+  if (this.gender) {
+    const genderMap = {
+      पुरुष: "MALE",
+      महिला: "FEMALE",
+    };
+    this.gender = genderMap[this.gender] || this.gender.toUpperCase();
+  }
+
+  next();
+});
 
 module.exports = mongoose.model("Document", documentSchema);
