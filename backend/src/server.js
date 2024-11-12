@@ -18,8 +18,8 @@ const corsOptions = {
   origin: ["https://docu-verify.vercel.app", "http://localhost:5173"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  exposedHeaders: ["set-cookie"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  exposedHeaders: ["Set-Cookie"],
 };
 
 app.use(cors(corsOptions));
@@ -29,6 +29,15 @@ app.options("*", cors(corsOptions)); // Handle preflight
 console.log("CORS Settings:", {
   origin: corsOptions.origin,
   credentials: corsOptions.credentials,
+});
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`, {
+    origin: req.headers.origin,
+    cookies: req.cookies,
+    body: req.body,
+  });
+  next();
 });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
