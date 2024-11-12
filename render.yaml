@@ -10,17 +10,17 @@ services:
         value: production
       - key: PORT
         value: 8000
-      - key: MONGODB_URI
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-      - key: ENCRYPTION_KEY
-        sync: false
+      - key: JWT_EXPIRE
+        value: 24h
+      - key: BASE_URL
+        sync: false # Will be set manually
       - key: CORS_ORIGIN
-        value: https://your-frontend-url.vercel.app
+        sync: false # Will be set manually
+      # Sensitive variables - don't include in yaml
+      # - MONGODB_URI
+      # - JWT_SECRET
+      # - ENCRYPTION_KEY
     disk:
       name: uploads
       mountPath: /opt/render/project/src/uploads
       sizeGB: 1
-    healthCheckPath: /health
-    autoDeploy: true

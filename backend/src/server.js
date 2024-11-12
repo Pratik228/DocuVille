@@ -41,6 +41,14 @@ app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
