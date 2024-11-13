@@ -3,16 +3,18 @@ const User = require("../models/User");
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    const token =
+      req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
+
     if (!token) {
-      return res.status(401).json({ error: "Authentication required" });
+      return res.status(401).json({ error: "Please log in to continue" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
 
     if (!user) {
-      return res.status(401).json({ error: "Please authenticate" });
+      return res.status(401).json({ error: "Please log in to continue" });
     }
 
     // Add debug logging
@@ -31,7 +33,7 @@ const auth = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Auth Error:", error);
-    res.status(401).json({ error: "Please authenticate" });
+    res.status(401).json({ error: "Please log in to continue" });
   }
 };
 

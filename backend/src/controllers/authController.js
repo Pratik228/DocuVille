@@ -103,6 +103,9 @@ exports.login = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production" ? ".onrender.com" : "localhost",
     };
 
     console.log("Cookie options:", cookieOptions);
@@ -118,6 +121,7 @@ exports.login = async (req, res) => {
         email: user.email,
         isAdmin: user.isAdmin,
       },
+      token,
     };
 
     console.log("Sending response:", response);
