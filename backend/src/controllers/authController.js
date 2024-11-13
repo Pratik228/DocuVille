@@ -45,7 +45,9 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${verificationToken}`;
+    const verificationUrl = `${
+      import.meta.env.VITE_API_URL
+    }/auth/verify-email/${verificationToken}`;
 
     const info = await transporter.sendMail({
       from: '"Document Verification" <test@example.com>',
@@ -74,44 +76,54 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
+    console.log("Login attempt:", req.body);
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
+      console.log("User not found:", email);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      console.log("Password mismatch for:", email);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     if (!user.isVerified) {
+      console.log("Unverified user:", email);
       return res.status(401).json({ error: "Please verify your email first" });
     }
 
     const token = user.generateAuthToken();
+    console.log("Generated token for:", email);
 
-    // Updated cookie settings
-    res.cookie("token", token, {
+    // Set cookie options
+    const cookieOptions = {
       httpOnly: true,
-      secure: true, // Always true for production
-      sameSite: "none", // Required for cross-site
-      maxAge: 24 * 60 * 60 * 1000,
-      domain:
-        process.env.NODE_ENV === "production" ? ".onrender.com" : "localhost",
-    });
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    };
 
-    res.json({
+    console.log("Cookie options:", cookieOptions);
+
+    res.cookie("token", token, cookieOptions);
+
+    // Send response
+    const response = {
       user: {
         id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         isAdmin: user.isAdmin,
-        token, // Include token in response
       },
-    });
+    };
+
+    console.log("Sending response:", response);
+    res.json(response);
   } catch (error) {
     console.error("Login error:", error);
     res.status(400).json({ error: error.message });
@@ -151,7 +163,9 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
-    const resetUrl = `${process.env.BASE_URL}/reset-password/${resetToken}`;
+    const resetUrl = `${
+      import.meta.env.VITE_API_URL
+    }/reset-password/${resetToken}`;
 
     const info = await transporter.sendMail({
       from: '"Document Verification" <test@example.com>',
