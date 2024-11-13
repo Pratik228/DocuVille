@@ -23,9 +23,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight
+app.options("*", cors(corsOptions));
 
-// Log CORS settings
 console.log("CORS Settings:", {
   origin: corsOptions.origin,
   credentials: corsOptions.credentials,
@@ -39,15 +38,9 @@ app.use((req, res, next) => {
   });
   next();
 });
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const uploadsPath =
-  process.env.NODE_ENV === "production"
-    ? "/opt/render/project/src/uploads"
-    : path.join(__dirname, "../uploads");
-
-app.use("/uploads", express.static(uploadsPath));
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -86,5 +79,4 @@ app.listen(PORT, () => {
     } mode on port ${PORT}`
   );
   console.log("CORS Origin:", corsOptions.origin);
-  console.log("Uploads Path:", uploadsPath);
 });

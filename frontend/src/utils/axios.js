@@ -4,7 +4,7 @@ const api = axios.create({
   baseURL: "https://docuverify-backend.onrender.com/api", // Direct URL instead of env variable for now
   withCredentials: true,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "multipart/form-data",
   },
 });
 

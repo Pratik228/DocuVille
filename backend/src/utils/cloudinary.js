@@ -26,9 +26,30 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({
+const cloudinaryUpload = multer({
   storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
   fileFilter: fileFilter,
 });
+
+// Wrap multer middleware to handle errors
+const upload = {
+  single: (fieldName) => {
+    return (req, res, next) => {
+      cloudinaryUpload.single(fieldName)(req, res, (err) => {
+        if (err) {
+          console.error("Upload error:", err);
+          return res.status(400).json({
+            error: "Upload failed",
+            message: err.message,
+          });
+        }
+        next();
+      });
+    };
+  },
+};
 
 module.exports = { upload, cloudinary };

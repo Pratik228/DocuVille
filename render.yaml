@@ -16,11 +16,14 @@ services:
         sync: false # Will be set manually
       - key: CORS_ORIGIN
         sync: false # Will be set manually
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false # Will be set manually
+      - key: CLOUDINARY_API_KEY
+        sync: false # Will be set manually
+      - key: CLOUDINARY_API_SECRET
+        sync: false # Will be set manually
       # Sensitive variables - don't include in yaml
       # - MONGODB_URI
       # - JWT_SECRET
       # - ENCRYPTION_KEY
-    disk:
-      name: uploads
-      mountPath: /opt/render/project/src/uploads
-      sizeGB: 1
+    # Remove the disk section since we're using Cloudinary
