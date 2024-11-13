@@ -58,7 +58,12 @@ const documentService = {
 
   deleteDocument: (documentId) => {
     if (!documentId) throw new Error("Document ID is required");
-    return api.delete(`/${documentId}`);
+    const token = localStorage.getItem("token");
+    return api.delete(`/${documentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   },
 };
 

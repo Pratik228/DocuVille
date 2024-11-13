@@ -51,6 +51,21 @@ const RegisterForm = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="link link-primary text-sm break-all"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      try {
+                        // Open the verification URL in a new tab
+                        window.open(verificationLink, "_blank");
+                        toast.info(
+                          "Check the verification result in the new tab"
+                        );
+                      } catch (err) {
+                        toast.error(
+                          "Verification failed. Please try again.",
+                          err
+                        );
+                      }
+                    }}
                   >
                     {verificationLink}
                   </a>

@@ -103,9 +103,14 @@ exports.deleteDocument = async (req, res) => {
       return res.status(404).json({ error: "Document not found" });
     }
 
-    // Delete from Cloudinary if public ID exists
-    if (document.metadata?.cloudinaryPublicId) {
-      await cloudinary.uploader.destroy(document.metadata.cloudinaryPublicId);
+    // Extract Cloudinary public ID from the URL
+    if (document.documentImage) {
+      const publicId = document.documentImage.split("/").pop().split(".")[0];
+      try {
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudinaryError) {
+        console.error("Cloudinary deletion error:", cloudinaryError);
+      }
     }
 
     await document.deleteOne();
@@ -115,6 +120,7 @@ exports.deleteDocument = async (req, res) => {
       message: "Document deleted successfully",
     });
   } catch (error) {
+    console.error("Delete error:", error);
     res.status(500).json({
       error: "Failed to delete document",
       message: error.message,
