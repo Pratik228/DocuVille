@@ -3,14 +3,15 @@ const extractData = require("../utils/extractData");
 const { validateDocument } = require("../utils/validation");
 const encryption = require("../utils/encryption");
 const jwt = require("jsonwebtoken");
-const fs = require("fs").promises;
-const { upload } = require("../utils/cloudinary");
+const { cloudinary } = require("../utils/cloudinary");
 
 exports.uploadDocument = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
+
+    // Now req.file will contain Cloudinary upload info
     const { data: extractedData } = await extractData(req.file.path);
 
     const document = new Document({
@@ -20,12 +21,13 @@ exports.uploadDocument = async (req, res) => {
       documentNumber: documentNumber || "UNKNOWN-DOC",
       dateOfBirth: extractedData.dateOfBirth || extractedData.yearOfBirth,
       gender: extractedData.gender,
-      documentImage: req.file.path, // This will be the Cloudinary URL
+      documentImage: req.file.path, // Cloudinary URL
       extractedData: extractedData,
       metadata: {
         originalFileName: req.file.originalname,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
+        cloudinaryPublicId: req.file.filename, // Store Cloudinary public ID
       },
     });
 
@@ -100,9 +102,12 @@ exports.deleteDocument = async (req, res) => {
     if (!document) {
       return res.status(404).json({ error: "Document not found" });
     }
-    if (document.documentImage) {
-      await fs.unlink(document.documentImage).catch(console.error);
+
+    // Delete from Cloudinary if public ID exists
+    if (document.metadata?.cloudinaryPublicId) {
+      await cloudinary.uploader.destroy(document.metadata.cloudinaryPublicId);
     }
+
     await document.deleteOne();
 
     res.json({
