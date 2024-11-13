@@ -9,6 +9,7 @@ router.use(auth);
 
 router.post(
   "/upload",
+  auth,
   upload.single("document"),
   documentController.uploadDocument
 );

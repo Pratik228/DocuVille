@@ -74,28 +74,23 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    console.log("Login attempt:", req.body);
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("User not found:", email);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      console.log("Password mismatch for:", email);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     if (!user.isVerified) {
-      console.log("Unverified user:", email);
       return res.status(401).json({ error: "Please verify your email first" });
     }
 
     const token = user.generateAuthToken();
-    console.log("Generated token for:", email);
 
     // Set cookie options
     const cookieOptions = {
@@ -104,16 +99,12 @@ exports.login = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       path: "/",
-      domain:
-        process.env.NODE_ENV === "production" ? ".onrender.com" : "localhost",
     };
-
-    console.log("Cookie options:", cookieOptions);
 
     res.cookie("token", token, cookieOptions);
 
-    // Send response
-    const response = {
+    // Send response with token
+    res.json({
       user: {
         id: user._id,
         firstName: user.firstName,
@@ -121,11 +112,8 @@ exports.login = async (req, res) => {
         email: user.email,
         isAdmin: user.isAdmin,
       },
-      token,
-    };
-
-    console.log("Sending response:", response);
-    res.json(response);
+      token, // Include token in response
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(400).json({ error: error.message });

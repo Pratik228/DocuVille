@@ -9,9 +9,12 @@ const api = axios.create({
 
 const documentService = {
   uploadDocument: (formData, onProgress) => {
+    // Get fresh token
+    const token = localStorage.getItem("token");
     return api.post("/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
       },
       onUploadProgress: onProgress
         ? (progressEvent) => {
@@ -59,12 +62,25 @@ const documentService = {
   },
 };
 
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    // Handle specific error cases
     if (error.response?.status === 401) {
-      throw new Error("Please log in to continue");
+      // Clear storage and redirect if unauthorized
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     }
     throw error.response?.data?.error || error.message || "An error occurred";
   }
