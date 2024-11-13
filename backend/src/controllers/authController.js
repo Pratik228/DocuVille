@@ -45,9 +45,7 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    const verificationUrl = `${
-      import.meta.env.VITE_API_URL
-    }/auth/verify-email/${verificationToken}`;
+    const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${verificationToken}`;
 
     const info = await transporter.sendMail({
       from: '"Document Verification" <test@example.com>',
@@ -163,9 +161,7 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
-    const resetUrl = `${
-      import.meta.env.VITE_API_URL
-    }/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.BASE_URL}/reset-password/${resetToken}`;
 
     const info = await transporter.sendMail({
       from: '"Document Verification" <test@example.com>',
