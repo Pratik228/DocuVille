@@ -34,12 +34,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
-app.use((req, res, next) => {
-  res.header("Cache-Control", "no-store, no-cache, must-revalidate, private");
-  res.header("Pragma", "no-cache");
-  res.header("Expires", "0");
-  next();
-});
 app.use((err, req, res, next) => {
   if (err.name === "CORSError") {
     return res.status(403).json({

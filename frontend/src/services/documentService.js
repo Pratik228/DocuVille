@@ -85,16 +85,12 @@ const documentService = {
   },
 };
 
-// Add this right after creating the api instance
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    // Add cache control headers
-    config.headers["Cache-Control"] = "no-cache";
-    config.headers["Pragma"] = "no-cache";
     return config;
   },
   (error) => Promise.reject(error)
