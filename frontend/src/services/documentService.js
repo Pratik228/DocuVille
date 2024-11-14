@@ -94,17 +94,17 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// api.interceptors.response.use(
-//   (response) => response.data,
-//   (error) => {
-//     if (error.response?.status === 401) {
-//       // Clear storage and redirect if unauthorized
-//       localStorage.removeItem("user");
-//       localStorage.removeItem("token");
-//       window.location.href = "/login";
-//     }
-//     throw error.response?.data?.error || error.message || "An error occurred";
-//   }
-// );
+api.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear storage and redirect if unauthorized
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    throw error.response?.data?.error || error.message || "An error occurred";
+  }
+);
 
 export default documentService;
