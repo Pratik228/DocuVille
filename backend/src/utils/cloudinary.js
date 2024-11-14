@@ -29,23 +29,36 @@ const fileFilter = (req, file, cb) => {
 const cloudinaryUpload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024,
   },
   fileFilter: fileFilter,
-});
+}).single("document");
 
-// Wrap multer middleware to handle errors
 const upload = {
   single: (fieldName) => {
     return (req, res, next) => {
-      cloudinaryUpload.single(fieldName)(req, res, (err) => {
+      cloudinaryUpload(req, res, (err) => {
         if (err) {
-          console.error("Upload error:", err);
+          console.error("Cloudinary upload error:", err);
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({
+              error: "File too large",
+              message: "Maximum file size is 5MB",
+            });
+          }
           return res.status(400).json({
             error: "Upload failed",
             message: err.message,
           });
         }
+
+        if (!req.file) {
+          return res.status(400).json({
+            error: "Upload failed",
+            message: "No file received",
+          });
+        }
+
         next();
       });
     };

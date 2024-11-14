@@ -11,14 +11,23 @@ exports.uploadDocument = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // Now req.file will contain Cloudinary upload info
-    const { data: extractedData } = await extractData(req.file.path);
+    console.log("File info:", req.file); // Add this for debugging
+
+    // Handle case where extractData might fail
+    let extractedData = {};
+    try {
+      const result = await extractData(req.file.path);
+      extractedData = result.data || {};
+    } catch (extractError) {
+      console.error("Data extraction error:", extractError);
+      // Continue with empty data if extraction fails
+    }
 
     const document = new Document({
       userId: req.user.id,
       documentType: "aadharId",
-      name: extractedData.name,
-      documentNumber: documentNumber || "UNKNOWN-DOC",
+      name: extractedData.name || "Unknown",
+      documentNumber: extractedData.documentNumber || "UNKNOWN-DOC",
       dateOfBirth: extractedData.dateOfBirth || extractedData.yearOfBirth,
       gender: extractedData.gender,
       documentImage: req.file.path, // Cloudinary URL
@@ -27,7 +36,7 @@ exports.uploadDocument = async (req, res) => {
         originalFileName: req.file.originalname,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
-        cloudinaryPublicId: req.file.filename, // Store Cloudinary public ID
+        cloudinaryPublicId: req.file.filename,
       },
     });
 
@@ -39,7 +48,9 @@ exports.uploadDocument = async (req, res) => {
       document: {
         id: document._id,
         name: document.name,
-        documentNumber: `XXXX${document.documentNumber.slice(-4)}`,
+        documentNumber: document.documentNumber
+          ? `XXXX${document.documentNumber.slice(-4)}`
+          : "XXXX-XXXX",
         dateOfBirth: document.dateOfBirth,
         gender: document.gender,
         verificationStatus: document.verificationStatus,
