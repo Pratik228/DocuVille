@@ -63,23 +63,38 @@ const documentService = {
     return response;
   },
 
-  deleteDocument: (documentId) => {
+  deleteDocument: async (documentId) => {
     if (!documentId) throw new Error("Document ID is required");
     const token = localStorage.getItem("token");
-    return api.delete(`/${documentId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const response = await api.delete(`/${documentId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache",
+        },
+      });
+      return response;
+    } catch (error) {
+      console.error("Delete error:", error);
+      throw (
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to delete document"
+      );
+    }
   },
 };
 
+// Add this right after creating the api instance
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Add cache control headers
+    config.headers["Cache-Control"] = "no-cache";
+    config.headers["Pragma"] = "no-cache";
     return config;
   },
   (error) => Promise.reject(error)

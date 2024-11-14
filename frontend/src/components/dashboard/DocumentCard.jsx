@@ -109,11 +109,17 @@ const DocumentCard = ({ document }) => {
     if (window.confirm("Are you sure you want to delete this document?")) {
       try {
         setIsDeleting(true);
+        console.log("Attempting to delete document:", document._id);
+
+        // First try to delete
         await dispatch(deleteDocument(document._id)).unwrap();
-        await dispatch(getDocuments()); // Refresh list after deletion
+
+        // If successful, refresh the list
         toast.success("Document deleted successfully");
+        await dispatch(getDocuments());
       } catch (err) {
-        toast.error(err || "Failed to delete document");
+        console.error("Delete failed:", err);
+        toast.error(err.toString() || "Failed to delete document");
       } finally {
         setIsDeleting(false);
       }

@@ -105,26 +105,33 @@ exports.getDocuments = async (req, res) => {
 
 exports.deleteDocument = async (req, res) => {
   try {
+    console.log("Delete request for document:", req.params.id);
+    console.log("User:", req.user);
+
     const document = await Document.findOne({
       _id: req.params.id,
       userId: req.user.id,
     });
 
     if (!document) {
+      console.log("Document not found");
       return res.status(404).json({ error: "Document not found" });
     }
 
     // Extract Cloudinary public ID from the URL
     if (document.documentImage) {
-      const publicId = document.documentImage.split("/").pop().split(".")[0];
       try {
+        const publicId = document.documentImage.split("/").pop().split(".")[0];
+        console.log("Attempting to delete from Cloudinary:", publicId);
         await cloudinary.uploader.destroy(publicId);
       } catch (cloudinaryError) {
         console.error("Cloudinary deletion error:", cloudinaryError);
+        // Continue with document deletion even if Cloudinary fails
       }
     }
 
     await document.deleteOne();
+    console.log("Document deleted successfully");
 
     res.json({
       success: true,
