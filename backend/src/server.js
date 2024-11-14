@@ -17,26 +17,29 @@ connectDB();
 const corsOptions = {
   origin: ["https://docu-verify.vercel.app", "http://localhost:5173"],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Cookie",
+    "X-Requested-With",
+  ],
   exposedHeaders: ["Set-Cookie"],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
-console.log("CORS Settings:", {
-  origin: corsOptions.origin,
-  credentials: corsOptions.credentials,
-});
-
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`, {
-    origin: req.headers.origin,
-    cookies: req.cookies,
-    body: req.body,
-  });
-  next();
+app.use((err, req, res, next) => {
+  if (err.name === "CORSError") {
+    return res.status(403).json({
+      error: "CORS error",
+      message: err.message,
+    });
+  }
+  next(err);
 });
 
 app.use(express.json());

@@ -48,10 +48,17 @@ const documentService = {
     if (!documentId) throw new Error("Document ID is required");
     if (!status) throw new Error("Status is required");
 
-    const response = await api.patch(`/${documentId}/verify`, {
-      status,
-      notes,
-    });
+    const token = localStorage.getItem("token");
+    const response = await api.patch(
+      `/${documentId}/verify`,
+      { status, notes },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return response;
   },

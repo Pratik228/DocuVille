@@ -258,6 +258,14 @@ exports.verifyDocument = async (req, res) => {
     const { id } = req.params;
     const { status, notes } = req.body;
 
+    console.log("Verify Request:", {
+      id,
+      status,
+      notes,
+      user: req.user,
+      headers: req.headers,
+    });
+
     const document = await Document.findById(id);
     if (!document) {
       return res.status(404).json({ error: "Document not found" });
@@ -273,14 +281,18 @@ exports.verifyDocument = async (req, res) => {
     // Decrypt document number for response
     const decryptedDocNumber = encryption.decrypt(document.documentNumber);
 
-    res.json({
+    const response = {
       success: true,
       message: `Document marked as ${status}`,
       document: {
         ...document.toObject(),
         documentNumber: encryption.mask(decryptedDocNumber),
       },
-    });
+    };
+
+    console.log("Verify Response:", response);
+
+    res.json(response);
   } catch (error) {
     console.error("Verification error:", error);
     res.status(500).json({
