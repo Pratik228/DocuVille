@@ -105,8 +105,7 @@ exports.getDocuments = async (req, res) => {
 
 exports.deleteDocument = async (req, res) => {
   try {
-    console.log("Delete request for document:", req.params.id);
-    console.log("User:", req.user);
+    console.log("Delete request received for ID:", req.params.id);
 
     const document = await Document.findOne({
       _id: req.params.id,
@@ -114,24 +113,36 @@ exports.deleteDocument = async (req, res) => {
     });
 
     if (!document) {
-      console.log("Document not found");
       return res.status(404).json({ error: "Document not found" });
     }
 
-    // Extract Cloudinary public ID from the URL
+    // Handle Cloudinary deletion
     if (document.documentImage) {
       try {
-        const publicId = document.documentImage.split("/").pop().split(".")[0];
-        console.log("Attempting to delete from Cloudinary:", publicId);
-        await cloudinary.uploader.destroy(publicId);
+        // Extract the public ID correctly from your URL format
+        // Example URL: /image/upload/v1731595244/docverify/klmibqosbe4aef6zq8ik.jpg
+        const urlParts = document.documentImage.split("/");
+        const filename = urlParts[urlParts.length - 1];
+        const publicId = `docverify/${filename.split(".")[0]}`;
+
+        console.log(
+          "Attempting to delete from Cloudinary, publicId:",
+          publicId
+        );
+
+        const cloudinaryResult = await cloudinary.uploader.destroy(publicId);
+        console.log("Cloudinary delete result:", cloudinaryResult);
       } catch (cloudinaryError) {
-        console.error("Cloudinary deletion error:", cloudinaryError);
+        console.error("Cloudinary deletion error:", {
+          error: cloudinaryError,
+          documentImage: document.documentImage,
+        });
         // Continue with document deletion even if Cloudinary fails
       }
     }
 
+    // Delete from MongoDB
     await document.deleteOne();
-    console.log("Document deleted successfully");
 
     res.json({
       success: true,
