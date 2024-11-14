@@ -22,11 +22,9 @@ const corsOptions = {
     "Content-Type",
     "Authorization",
     "Cookie",
-    "Cache-Control",
     "X-Requested-With",
   ],
-  exposedHeaders: ["Set-Cookie", "Cache-Control"],
-  maxAge: 1800,
+  exposedHeaders: ["Set-Cookie"],
   preflightContinue: false,
   optionsSuccessStatus: 204,
 };
