@@ -67,49 +67,18 @@ const documentService = {
     if (!documentId) throw new Error("Document ID is required");
     const token = localStorage.getItem("token");
 
-    console.log("Initiating delete request for document:", documentId);
-
     try {
       const response = await api.delete(`/${documentId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        validateStatus: function (status) {
-          return status < 500; // Resolve only if the status code is less than 500
-        },
       });
-
-      console.log("Delete response:", response);
-
-      if (response.status === 404) {
-        throw new Error("Document not found or unauthorized");
-      }
-
       return response;
     } catch (error) {
-      console.error("Delete request error:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
-
-      // Provide more specific error messages
-      if (error.response?.status === 404) {
-        throw new Error(
-          "Document not found or you don't have permission to delete it"
-        );
-      } else if (error.response?.status === 401) {
-        throw new Error("Authentication failed - please log in again");
-      } else if (!error.response) {
-        throw new Error("Network error - please check your connection");
-      }
-
-      throw (
-        error.response?.data?.error ||
-        error.message ||
-        "Failed to delete document"
-      );
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Delete error:", errorMessage);
+      throw errorMessage;
     }
   },
 };
@@ -125,17 +94,17 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-api.interceptors.response.use(
-  (response) => response.data,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Clear storage and redirect if unauthorized
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    throw error.response?.data?.error || error.message || "An error occurred";
-  }
-);
+// api.interceptors.response.use(
+//   (response) => response.data,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       // Clear storage and redirect if unauthorized
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("token");
+//       window.location.href = "/login";
+//     }
+//     throw error.response?.data?.error || error.message || "An error occurred";
+//   }
+// );
 
 export default documentService;

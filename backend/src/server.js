@@ -54,6 +54,21 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  if (err instanceof mongoose.Error) {
+    return res.status(400).json({
+      error: "Database error",
+      message: err.message,
+    });
+  }
+
+  res.status(err.status || 500).json({
+    error: err.message || "Internal server error",
+  });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/docs", documentRoutes);
 

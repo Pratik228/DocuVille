@@ -4,6 +4,7 @@ const { validateDocument } = require("../utils/validation");
 const encryption = require("../utils/encryption");
 const jwt = require("jsonwebtoken");
 const { cloudinary } = require("../utils/cloudinary");
+const mongoose = require("mongoose");
 
 exports.uploadDocument = async (req, res) => {
   try {
