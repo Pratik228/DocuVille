@@ -1,6 +1,10 @@
 const crypto = require("crypto");
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+const ENCRYPTION_KEY = crypto
+  .createHash("sha256")
+  .update(String(process.env.ENCRYPTION_KEY))
+  .digest("base64")
+  .slice(0, 32); // Ensure 32 byte key length
 const IV_LENGTH = 16;
 
 const encryption = {
@@ -43,8 +47,12 @@ const encryption = {
   },
 
   mask: (number) => {
-    if (!number) return "XXXX-XXXX";
-    return `XXXX${number.slice(-4)}`;
+    if (!number) return "XXXX-XXXX-XXXX";
+    const cleanNumber = number.replace(/[^0-9]/g, "");
+    if (cleanNumber.length >= 4) {
+      return `XXXX-XXXX-${cleanNumber.slice(-4)}`;
+    }
+    return "XXXX-XXXX-XXXX";
   },
 };
 

@@ -36,11 +36,18 @@ const documentService = {
     return api.post(`/${documentId}/view`);
   },
 
-  getDocumentWithToken: (viewToken) => {
+  getDocumentWithToken: async (viewToken) => {
     if (!viewToken) throw new Error("View token is required");
-    return api.get("/view", {
-      params: { viewToken },
-    });
+    try {
+      const response = await api.get("/view", {
+        params: { viewToken },
+      });
+      console.log("View token response:", response); // Debug log
+      return response;
+    } catch (error) {
+      console.error("View token error:", error);
+      throw error;
+    }
   },
 
   verifyDocument: async (documentId, { status, notes }) => {

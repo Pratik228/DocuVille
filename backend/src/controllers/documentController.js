@@ -10,13 +10,22 @@ exports.uploadDocument = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
+
+    console.log("Starting document upload process");
+
     let extractedData = {};
     try {
       const result = await extractData(req.file.path);
+      console.log("Extraction result:", result);
       extractedData = result.data || {};
+      console.log("Extracted data:", extractedData);
     } catch (extractError) {
       console.error("Data extraction error:", extractError);
-      // Continue with empty data if extraction fails
+    }
+
+    // Validate extractedData
+    if (Object.keys(extractedData).length > 0) {
+      console.log("Creating document with extracted data:", extractedData);
     }
 
     const document = new Document({
@@ -36,22 +45,33 @@ exports.uploadDocument = async (req, res) => {
       },
     });
 
+    console.log("Document before save:", {
+      name: document.name,
+      documentNumber: document.documentNumber,
+      dateOfBirth: document.dateOfBirth,
+      gender: document.gender,
+    });
+
     await document.save();
 
-    res.status(201).json({
+    // Get decrypted number for proper masking
+    const decryptedNumber = encryption.decrypt(document.documentNumber);
+
+    const response = {
       success: true,
       message: "Document uploaded and processed successfully",
       document: {
         id: document._id,
         name: document.name,
-        documentNumber: document.documentNumber
-          ? `XXXX${document.documentNumber.slice(-4)}`
-          : "XXXX-XXXX",
+        documentNumber: `XXXX-XXXX-${decryptedNumber.slice(-4)}`,
         dateOfBirth: document.dateOfBirth,
         gender: document.gender,
         verificationStatus: document.verificationStatus,
       },
-    });
+    };
+
+    console.log("Sending response:", response);
+    res.status(201).json(response);
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({
@@ -205,7 +225,6 @@ exports.getDocumentWithToken = async (req, res) => {
 
     let document;
     if (decoded.isAdmin) {
-      // Admin can view any document
       document = await Document.findById(decoded.documentId);
     } else {
       document = await Document.findOne({
@@ -218,20 +237,24 @@ exports.getDocumentWithToken = async (req, res) => {
       return res.status(404).json({ error: "Document not found" });
     }
 
-    // Decrypt document number for viewing
-    const decryptedDocNumber = encryption.decrypt(document.documentNumber);
+    // Get raw decrypted number
+    const decryptedNumber = encryption.decrypt(document.documentNumber);
+    console.log("Decrypted number:", decryptedNumber); // Debug log
 
-    res.json({
+    const response = {
       success: true,
       data: {
         ...document.toObject(),
         documentImage: document.documentImage,
         extractedData: document.extractedData,
-        documentNumber: decryptedDocNumber,
+        documentNumber: decryptedNumber, // Send the full number
         dateOfBirth: document.dateOfBirth,
         viewsRemaining: decoded.isAdmin ? "unlimited" : 3 - document.viewCount,
       },
-    });
+    };
+
+    console.log("Sending response:", response); // Debug log
+    res.json(response);
   } catch (error) {
     console.error("View error:", error);
     if (error.name === "TokenExpiredError") {
