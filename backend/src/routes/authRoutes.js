@@ -14,7 +14,6 @@ router.patch("/make-admin", auth, async (req, res) => {
   try {
     const { userId } = req.body;
 
-    // Only super admin can make others admin
     if (!req.user.isAdmin) {
       return res.status(403).json({ error: "Not authorized" });
     }

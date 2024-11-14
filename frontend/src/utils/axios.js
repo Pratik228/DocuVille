@@ -1,17 +1,15 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://docuverify-backend.onrender.com/api", // Direct URL instead of env variable for now
+  baseURL: "https://docuverify-backend.onrender.com/api",
   withCredentials: true,
   headers: {
     "Content-Type": "multipart/form-data",
   },
 });
 
-// Debug request interceptor
 api.interceptors.request.use(
   (config) => {
-    console.log("Making request to:", config.url);
     const user = localStorage.getItem("user");
     if (user) {
       config.headers.Authorization = `Bearer ${JSON.parse(user).token}`;
@@ -27,7 +25,6 @@ api.interceptors.request.use(
 // Debug response interceptor
 api.interceptors.response.use(
   (response) => {
-    console.log("Response received:", response.status);
     return response;
   },
   (error) => {

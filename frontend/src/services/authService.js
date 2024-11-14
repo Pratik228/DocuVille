@@ -12,12 +12,9 @@ const authService = {
   login: async (credentials) => {
     const response = await api.post("/auth/login", credentials);
     const userData = response.data.user;
-    // Store user in localStorage
     localStorage.setItem("user", JSON.stringify(userData));
-    // If token is in response, set it in localStorage
     if (response.data.token) {
       localStorage.setItem("token", response.data.token);
-      // Set token in default headers for future requests
       api.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${response.data.token}`;
@@ -41,19 +38,14 @@ const authService = {
     const response = await api.get(`/auth/verify-email/${token}`);
     return response.data;
   },
-
-  // Add a method to check if user is logged in
   isLoggedIn: () => {
     return !!localStorage.getItem("user");
   },
-
-  // Get current user data
   getCurrentUser: () => {
     return JSON.parse(localStorage.getItem("user"));
   },
 };
 
-// Update interceptors to add token to requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");

@@ -28,13 +28,11 @@ const DocumentView = ({ document, onClose }) => {
         return format(new Date(dateString), "dd MMM yyyy");
       }
 
-      // If it's YYYY-DD-MM format
       if (dateString.includes("-")) {
         const [year, month, day] = dateString.split("-");
         return format(new Date(year, month - 1, day), "dd MMM yyyy");
       }
 
-      // If it's DD/MM/YYYY format
       if (dateString.includes("/")) {
         const [day, month, year] = dateString.split("/");
         return format(new Date(year, month - 1, day), "dd MMM yyyy");
@@ -43,7 +41,7 @@ const DocumentView = ({ document, onClose }) => {
       return dateString;
     } catch (error) {
       console.error("Date formatting error:", error);
-      return dateString; // Return original string if formatting fails
+      return dateString;
     }
   };
 
@@ -79,7 +77,6 @@ const DocumentView = ({ document, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-base-100 rounded-lg w-full max-w-2xl">
-        {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
           <h3 className="text-lg font-semibold">Document Details</h3>
           <div className="flex items-center gap-4">
@@ -101,9 +98,7 @@ const DocumentView = ({ document, onClose }) => {
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Document details grid */}
           <div
             className={`grid grid-cols-2 gap-6 ${isBlurred ? "blur-md" : ""}`}
           >
@@ -142,8 +137,6 @@ const DocumentView = ({ document, onClose }) => {
               </p>
             </div>
           </div>
-
-          {/* Document Image */}
           {document.documentImage && (
             <div
               className={`relative aspect-[3/4] bg-base-200 rounded-lg overflow-hidden ${
@@ -157,8 +150,6 @@ const DocumentView = ({ document, onClose }) => {
               />
             </div>
           )}
-
-          {/* Extracted Data */}
           {document.extractedData &&
             Object.keys(document.extractedData).length > 0 && (
               <div className={isBlurred ? "blur-md" : ""}>
@@ -171,8 +162,6 @@ const DocumentView = ({ document, onClose }) => {
               </div>
             )}
         </div>
-
-        {/* Warning Toast */}
         {showWarning && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
             <div className="alert alert-warning shadow-lg">

@@ -14,9 +14,6 @@ const extractData = async (imagePath) => {
     });
 
     const text = result.data.text;
-    console.log("Extracted text:", text);
-
-    // Enhanced patterns for Aadhar
     const patterns = {
       documentNumber: /(\d{4}\s?\d{4}\s?\d{4})/,
       vid: /VID\s*:\s*(\d{4}\s?\d{4}\s?\d{4}\s?\d{4})/,
@@ -61,7 +58,6 @@ const extractData = async (imagePath) => {
       return null;
     };
 
-    // Extract all fields
     for (const [key, regex] of Object.entries(patterns)) {
       const value = tryPatterns(regex, text);
       if (value) {
@@ -69,13 +65,9 @@ const extractData = async (imagePath) => {
         console.log(`${key} match:`, value.trim());
       }
     }
-
-    // Handle year-only birth dates
     if (!extracted.dateOfBirth && extracted.yearOfBirth) {
       extracted.dateOfBirth = extracted.yearOfBirth;
     }
-
-    // Normalize gender
     if (extracted.gender) {
       const genderMap = {
         पुरुष: "MALE",
@@ -88,7 +80,6 @@ const extractData = async (imagePath) => {
         extracted.gender.toUpperCase();
     }
 
-    // Clean up name
     if (extracted.name) {
       extracted.name = extracted.name
         .replace(/[^\w\s]/g, "")
@@ -100,9 +91,6 @@ const extractData = async (imagePath) => {
         )
         .join(" ");
     }
-
-    console.log("Final extracted data:", extracted);
-
     return {
       documentType: "aadharId",
       data: extracted,

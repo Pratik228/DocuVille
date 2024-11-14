@@ -44,8 +44,6 @@ const LoginForm = () => {
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title justify-center text-2xl mb-4">Login</h2>
-
-          {/* Quick Login Buttons */}
           <div className="flex gap-2 mb-4">
             <button
               type="button"

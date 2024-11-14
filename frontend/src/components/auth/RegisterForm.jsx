@@ -54,7 +54,6 @@ const RegisterForm = () => {
                     onClick={async (e) => {
                       e.preventDefault();
                       try {
-                        // Open the verification URL in a new tab
                         window.open(verificationLink, "_blank");
                         toast.info(
                           "Check the verification result in the new tab"

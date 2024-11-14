@@ -27,7 +27,7 @@ const AdminVerifyModal = ({ document, onClose }) => {
         })
       ).unwrap();
 
-      await dispatch(getDocuments()); // Refresh the documents list
+      await dispatch(getDocuments());
       toast.success(`Document marked as ${status}`);
       onClose();
     } catch (err) {

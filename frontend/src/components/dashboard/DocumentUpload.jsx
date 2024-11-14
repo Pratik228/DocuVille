@@ -23,8 +23,6 @@ const DocumentUpload = () => {
       }
 
       setFile(selectedFile);
-
-      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result);
@@ -33,7 +31,6 @@ const DocumentUpload = () => {
     }
   };
 
-  // components/dashboard/DocumentUpload.jsx
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) {
@@ -46,12 +43,10 @@ const DocumentUpload = () => {
     formData.append("documentType", "aadharId");
 
     try {
-      // const result = await dispatch(uploadDocument(formData)).unwrap();
       await dispatch(uploadDocument(formData)).unwrap();
       toast.success("Document uploaded successfully");
       setFile(null);
       setPreview(null);
-      // Refresh the list after successful upload
       dispatch(getDocuments());
     } catch (err) {
       console.error("Upload error:", err);

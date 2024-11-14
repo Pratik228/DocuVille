@@ -9,7 +9,6 @@ const api = axios.create({
 
 const documentService = {
   uploadDocument: (formData, onProgress) => {
-    // Get fresh token
     const token = localStorage.getItem("token");
     return api.post("/upload", formData, {
       headers: {

@@ -14,7 +14,6 @@ const Dashboard = () => {
     dispatch(getDocuments());
   }, [dispatch]);
 
-  // Calculate document statistics
   const stats = {
     total: documents?.length || 0,
     pending:

@@ -6,7 +6,6 @@ const { auth, isAdmin } = require("../middlewares/auth");
 
 router.use(auth);
 
-// Add specific OPTIONS handling for delete
 router.options("/:id", (req, res) => {
   res.header("Access-Control-Allow-Methods", "DELETE");
   res.status(204).send();

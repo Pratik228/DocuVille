@@ -74,8 +74,6 @@ const DocumentCard = ({ document }) => {
   const [showViewer, setShowViewer] = useState(false);
   const [viewToken, setViewToken] = useState(null);
   const [showAdminVerify, setShowAdminVerify] = useState(false);
-
-  // Create masked number from document number
   const maskedNumber = document?.documentNumber
     ? `XXXX-${document.documentNumber.slice(-4)}`
     : "XXXX-XXXX";
@@ -109,12 +107,7 @@ const DocumentCard = ({ document }) => {
     if (window.confirm("Are you sure you want to delete this document?")) {
       try {
         setIsDeleting(true);
-        console.log("Attempting to delete document:", document._id);
-
-        // First try to delete
         await dispatch(deleteDocument(document._id)).unwrap();
-
-        // If successful, refresh the list
         toast.success("Document deleted successfully");
         await dispatch(getDocuments());
       } catch (err) {

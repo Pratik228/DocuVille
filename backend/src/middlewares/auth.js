@@ -9,8 +9,6 @@ const auth = async (req, res, next) => {
       hasAuthHeader: !!req.header("Authorization"),
       hasCookie: !!req.cookies.token,
     });
-
-    // Get token from cookie or Authorization header
     const token =
       req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
 

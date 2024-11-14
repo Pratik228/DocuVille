@@ -6,7 +6,6 @@ const validateDocument = (extractedData) => {
     return { isValid: false, errors };
   }
 
-  // Basic validations - document must have at least a number and name
   if (!extractedData.documentNumber || !extractedData.name) {
     if (!extractedData.documentNumber)
       errors.push("Could not extract document number");
@@ -14,7 +13,6 @@ const validateDocument = (extractedData) => {
     return { isValid: false, errors };
   }
 
-  // Gender validation if present
   if (extractedData.gender) {
     const validGenders = ["MALE", "FEMALE", "OTHER", "महिला", "पुरुष"];
     if (!validGenders.includes(extractedData.gender.toUpperCase())) {

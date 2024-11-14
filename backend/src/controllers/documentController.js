@@ -10,10 +10,6 @@ exports.uploadDocument = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-
-    console.log("File info:", req.file); // Add this for debugging
-
-    // Handle case where extractData might fail
     let extractedData = {};
     try {
       const result = await extractData(req.file.path);
@@ -30,7 +26,7 @@ exports.uploadDocument = async (req, res) => {
       documentNumber: extractedData.documentNumber || "UNKNOWN-DOC",
       dateOfBirth: extractedData.dateOfBirth || extractedData.yearOfBirth,
       gender: extractedData.gender,
-      documentImage: req.file.path, // Cloudinary URL
+      documentImage: req.file.path,
       extractedData: extractedData,
       metadata: {
         originalFileName: req.file.originalname,
@@ -68,20 +64,15 @@ exports.uploadDocument = async (req, res) => {
 exports.getDocuments = async (req, res) => {
   try {
     let documents;
-
-    // If user is admin, get all documents
     if (req.user.isAdmin) {
       documents = await Document.find()
         .select("-documentImage -extractedData")
         .sort("-createdAt");
     } else {
-      // If regular user, get only their documents
       documents = await Document.find({ userId: req.user.id })
         .select("-documentImage -extractedData")
         .sort("-createdAt");
     }
-
-    // Decrypt and mask document numbers
     const processedDocuments = documents.map((doc) => {
       const decrypted = encryption.decrypt(doc.documentNumber);
       return {
@@ -105,9 +96,6 @@ exports.getDocuments = async (req, res) => {
 
 exports.deleteDocument = async (req, res) => {
   try {
-    console.log("Delete request received for ID:", req.params.id);
-
-    // Build query based on user role
     const query = req.user.isAdmin
       ? { _id: req.params.id }
       : { _id: req.params.id, userId: req.user.id };
@@ -124,13 +112,7 @@ exports.deleteDocument = async (req, res) => {
         const urlParts = document.documentImage.split("/");
         const filename = urlParts[urlParts.length - 1];
         const publicId = `docverify/${filename.split(".")[0]}`;
-
-        console.log(
-          "Attempting to delete from Cloudinary, publicId:",
-          publicId
-        );
         const cloudinaryResult = await cloudinary.uploader.destroy(publicId);
-        console.log("Cloudinary delete result:", cloudinaryResult);
       } catch (cloudinaryError) {
         console.error("Cloudinary deletion error:", {
           error: cloudinaryError,
@@ -162,7 +144,6 @@ exports.requestDocumentView = async (req, res) => {
     if (req.user.isAdmin) {
       document = await Document.findById(req.params.id);
     } else {
-      // For regular users, only their own documents
       document = await Document.findOne({
         _id: req.params.id,
         userId: req.user.id,
@@ -190,7 +171,6 @@ exports.requestDocumentView = async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    // Only increment view count for non-admin users
     if (!req.user.isAdmin) {
       document.viewCount += 1;
       document.viewHistory.push({ viewedAt: new Date() });
@@ -228,7 +208,6 @@ exports.getDocumentWithToken = async (req, res) => {
       // Admin can view any document
       document = await Document.findById(decoded.documentId);
     } else {
-      // Regular users can only view their documents
       document = await Document.findOne({
         _id: decoded.documentId,
         userId: req.user.id,
@@ -273,14 +252,6 @@ exports.verifyDocument = async (req, res) => {
     const { id } = req.params;
     const { status, notes } = req.body;
 
-    console.log("Verify Request:", {
-      id,
-      status,
-      notes,
-      user: req.user,
-      headers: req.headers,
-    });
-
     const document = await Document.findById(id);
     if (!document) {
       return res.status(404).json({ error: "Document not found" });
@@ -304,8 +275,6 @@ exports.verifyDocument = async (req, res) => {
         documentNumber: encryption.mask(decryptedDocNumber),
       },
     };
-
-    console.log("Verify Response:", response);
 
     res.json(response);
   } catch (error) {

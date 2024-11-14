@@ -92,7 +92,6 @@ exports.login = async (req, res) => {
 
     const token = user.generateAuthToken();
 
-    // Set cookie options
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -102,8 +101,6 @@ exports.login = async (req, res) => {
     };
 
     res.cookie("token", token, cookieOptions);
-
-    // Send response with token
     res.json({
       user: {
         id: user._id,
@@ -112,7 +109,7 @@ exports.login = async (req, res) => {
         email: user.email,
         isAdmin: user.isAdmin,
       },
-      token, // Include token in response
+      token,
     });
   } catch (error) {
     console.error("Login error:", error);

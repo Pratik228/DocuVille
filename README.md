@@ -13,6 +13,11 @@ A robust document verification system built with the MERN stack that provides se
 - 🔍 Search and filter capabilities
 - 📱 Responsive design
 
+## Live Demo
+
+- Frontend: https://docu-verify.vercel.app
+- Backend: https://docuverify-backend.onrender.com
+
 ## 🏗 System Architecture
 
 ![alt text](HLD.png)
