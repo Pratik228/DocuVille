@@ -70,7 +70,6 @@ const documentService = {
       const response = await api.delete(`/${documentId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Cache-Control": "no-cache",
         },
       });
       return response;
