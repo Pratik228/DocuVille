@@ -109,26 +109,15 @@ exports.deleteDocument = async (req, res) => {
     console.log("Delete request received:", {
       id: req.params.id,
       userId: req.user?.id,
-      headers: req.headers,
-      url: req.originalUrl,
     });
 
-    // Validate MongoDB ID format
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      console.log("Invalid MongoDB ID format");
-      return res.status(400).json({ error: "Invalid document ID format" });
+    if (!req.params.id) {
+      return res.status(400).json({ error: "Document ID is required" });
     }
 
     const document = await Document.findOne({
       _id: req.params.id,
       userId: req.user.id,
-    });
-
-    console.log("Document search result:", {
-      found: !!document,
-      documentId: document?._id,
-      userId: document?.userId,
-      imageUrl: document?.documentImage,
     });
 
     if (!document) {
@@ -145,45 +134,24 @@ exports.deleteDocument = async (req, res) => {
         const filename = urlParts[urlParts.length - 1];
         const publicId = `docverify/${filename.split(".")[0]}`;
 
-        console.log("Cloudinary deletion attempt:", {
-          originalUrl: document.documentImage,
-          publicId: publicId,
-        });
-
         const cloudinaryResult = await cloudinary.uploader.destroy(publicId);
         console.log("Cloudinary deletion result:", cloudinaryResult);
       } catch (cloudinaryError) {
-        console.error("Cloudinary deletion error:", {
-          error: cloudinaryError,
-          documentImage: document.documentImage,
-          stack: cloudinaryError.stack,
-        });
+        console.error("Cloudinary deletion error:", cloudinaryError);
       }
     }
 
-    // Delete from MongoDB
-    const deleteResult = await document.deleteOne();
-    console.log("MongoDB deletion result:", deleteResult);
+    await document.deleteOne();
 
     res.json({
       success: true,
       message: "Document deleted successfully",
-      details: {
-        documentId: document._id,
-        deletedAt: new Date().toISOString(),
-      },
     });
   } catch (error) {
-    console.error("Delete operation error:", {
-      error: error.message,
-      stack: error.stack,
-      code: error.code,
-    });
-
+    console.error("Delete error:", error);
     res.status(500).json({
       error: "Failed to delete document",
       message: error.message,
-      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 };
