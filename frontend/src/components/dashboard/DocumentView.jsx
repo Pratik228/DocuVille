@@ -124,7 +124,12 @@ const DocumentView = ({ document, viewToken, onClose }) => {
                 Document Number
               </label>
               <p className="font-semibold mt-1">
-                {documentData.documentNumber}
+                {documentData.documentNumber
+                  ? documentData.documentNumber
+                      .replace(/[^0-9]/g, "")
+                      .match(/.{1,4}/g)
+                      ?.join(" ")
+                  : "N/A"}
               </p>
             </div>
             <div>

@@ -237,24 +237,20 @@ exports.getDocumentWithToken = async (req, res) => {
       return res.status(404).json({ error: "Document not found" });
     }
 
-    // Get raw decrypted number
-    const decryptedNumber = encryption.decrypt(document.documentNumber);
-    console.log("Decrypted number:", decryptedNumber); // Debug log
+    // Decrypt document number but keep original number for display
+    const decryptedDocNumber = encryption.decrypt(document.documentNumber);
 
-    const response = {
+    res.json({
       success: true,
       data: {
         ...document.toObject(),
         documentImage: document.documentImage,
         extractedData: document.extractedData,
-        documentNumber: decryptedNumber, // Send the full number
+        documentNumber: decryptedDocNumber.replace(/[^0-9]/g, ""), // Clean the number
         dateOfBirth: document.dateOfBirth,
         viewsRemaining: decoded.isAdmin ? "unlimited" : 3 - document.viewCount,
       },
-    };
-
-    console.log("Sending response:", response); // Debug log
-    res.json(response);
+    });
   } catch (error) {
     console.error("View error:", error);
     if (error.name === "TokenExpiredError") {
