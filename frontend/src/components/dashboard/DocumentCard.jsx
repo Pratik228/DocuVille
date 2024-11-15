@@ -74,6 +74,7 @@ const DocumentCard = ({ document }) => {
   const [showViewer, setShowViewer] = useState(false);
   const [viewToken, setViewToken] = useState(null);
   const [showAdminVerify, setShowAdminVerify] = useState(false);
+
   const maskedNumber = document?.documentNumber
     ? `XXXX-${document.documentNumber.slice(-4)}`
     : "XXXX-XXXX";
@@ -147,6 +148,19 @@ const DocumentCard = ({ document }) => {
   };
 
   if (!document) return null;
+
+  if (showViewer && viewToken) {
+    return (
+      <DocumentView
+        document={document}
+        viewToken={viewToken}
+        onClose={() => {
+          setShowViewer(false);
+          setViewToken(null);
+        }}
+      />
+    );
+  }
 
   return (
     <>
@@ -225,17 +239,6 @@ const DocumentCard = ({ document }) => {
           </button>
         </div>
       </div>
-
-      {showViewer && viewToken && document && (
-        <DocumentView
-          document={document}
-          viewToken={viewToken}
-          onClose={() => {
-            setShowViewer(false);
-            setViewToken(null);
-          }}
-        />
-      )}
 
       {showAdminVerify && (
         <AdminVerifyModal
