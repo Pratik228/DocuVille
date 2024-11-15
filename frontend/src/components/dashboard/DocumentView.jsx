@@ -84,8 +84,9 @@ const DocumentView = ({ document, viewToken, onClose }) => {
   if (!documentData) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-base-100 rounded-lg w-full max-w-lg">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-base-100 rounded-lg w-full max-w-lg mx-4 shadow-xl">
+        {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
           <h3 className="text-lg font-semibold">Document Details</h3>
           <div className="flex items-center gap-4">
@@ -107,23 +108,24 @@ const DocumentView = ({ document, viewToken, onClose }) => {
           </div>
         </div>
 
+        {/* Content */}
         <div className="p-6">
           <div
-            className={`grid grid-cols-2 gap-x-8 gap-y-4 ${
+            className={`grid grid-cols-2 gap-x-6 gap-y-4 ${
               isBlurred ? "blur-md" : ""
             }`}
           >
-            <div>
+            <div className="space-y-1">
               <label className="text-sm text-base-content/70">
                 Document Type
               </label>
-              <p className="font-semibold mt-1">Aadhar Card</p>
+              <p className="font-semibold">Aadhar Card</p>
             </div>
-            <div>
+            <div className="space-y-1">
               <label className="text-sm text-base-content/70">
                 Document Number
               </label>
-              <p className="font-semibold mt-1">
+              <p className="font-semibold">
                 {documentData.documentNumber
                   ? documentData.documentNumber
                       .replace(/[^0-9]/g, "")
@@ -132,33 +134,32 @@ const DocumentView = ({ document, viewToken, onClose }) => {
                   : "N/A"}
               </p>
             </div>
-            <div>
+            <div className="space-y-1">
               <label className="text-sm text-base-content/70">Name</label>
-              <p className="font-semibold mt-1">{documentData.name || "N/A"}</p>
+              <p className="font-semibold">{documentData.name || "N/A"}</p>
             </div>
-            <div>
+            <div className="space-y-1">
               <label className="text-sm text-base-content/70">
                 Date of Birth
               </label>
-              <p className="font-semibold mt-1">
+              <p className="font-semibold">
                 {formatDate(documentData.dateOfBirth)}
               </p>
             </div>
-            <div>
+            <div className="space-y-1">
               <label className="text-sm text-base-content/70">Gender</label>
-              <p className="font-semibold mt-1">
-                {documentData.gender || "N/A"}
-              </p>
+              <p className="font-semibold">{documentData.gender || "N/A"}</p>
             </div>
-            <div>
+            <div className="space-y-1">
               <label className="text-sm text-base-content/70">Status</label>
-              <p className="font-semibold mt-1 capitalize">
+              <p className="font-semibold capitalize">
                 {documentData.verificationStatus}
               </p>
             </div>
           </div>
         </div>
 
+        {/* Warning */}
         {showWarning && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
             <div className="alert alert-warning shadow-lg">
