@@ -84,91 +84,86 @@ const DocumentView = ({ document, viewToken, onClose }) => {
   if (!documentData) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-base-100 rounded-lg w-full max-w-lg mx-4 shadow-xl">
-        {/* Header */}
-        <div className="p-4 border-b flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Document Details</h3>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <FiClock className={timeLeft <= 5 ? "text-error" : ""} />
-              <span className={timeLeft <= 5 ? "text-error" : ""}>
-                {timeLeft}s
-              </span>
-            </div>
-            <button
-              onClick={() => setIsBlurred(!isBlurred)}
-              className="btn btn-ghost btn-sm"
-            >
-              {isBlurred ? <FiEye /> : <FiEyeOff />}
-            </button>
-            <button onClick={handleClose} className="btn btn-ghost btn-sm">
-              ✕
-            </button>
+    <div className="bg-base-100 rounded-lg w-full max-w-lg">
+      <div className="p-4 border-b flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Document Details</h3>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <FiClock className={timeLeft <= 5 ? "text-error" : ""} />
+            <span className={timeLeft <= 5 ? "text-error" : ""}>
+              {timeLeft}s
+            </span>
           </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
-          <div
-            className={`grid grid-cols-2 gap-x-6 gap-y-4 ${
-              isBlurred ? "blur-md" : ""
-            }`}
+          <button
+            onClick={() => setIsBlurred(!isBlurred)}
+            className="btn btn-ghost btn-sm"
           >
-            <div className="space-y-1">
-              <label className="text-sm text-base-content/70">
-                Document Type
-              </label>
-              <p className="font-semibold">Aadhar Card</p>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm text-base-content/70">
-                Document Number
-              </label>
-              <p className="font-semibold">
-                {documentData.documentNumber
-                  ? documentData.documentNumber
-                      .replace(/[^0-9]/g, "")
-                      .match(/.{1,4}/g)
-                      ?.join(" ")
-                  : "N/A"}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm text-base-content/70">Name</label>
-              <p className="font-semibold">{documentData.name || "N/A"}</p>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm text-base-content/70">
-                Date of Birth
-              </label>
-              <p className="font-semibold">
-                {formatDate(documentData.dateOfBirth)}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm text-base-content/70">Gender</label>
-              <p className="font-semibold">{documentData.gender || "N/A"}</p>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm text-base-content/70">Status</label>
-              <p className="font-semibold capitalize">
-                {documentData.verificationStatus}
-              </p>
-            </div>
+            {isBlurred ? <FiEye /> : <FiEyeOff />}
+          </button>
+          <button onClick={handleClose} className="btn btn-ghost btn-sm">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div className="p-6">
+        <div
+          className={`grid grid-cols-2 gap-x-8 gap-y-4 ${
+            isBlurred ? "blur-md" : ""
+          }`}
+        >
+          <div>
+            <label className="text-sm text-base-content/70">
+              Document Type
+            </label>
+            <p className="font-semibold mt-1">Aadhar Card</p>
+          </div>
+          <div>
+            <label className="text-sm text-base-content/70">
+              Document Number
+            </label>
+            <p className="font-semibold mt-1">
+              {documentData.documentNumber
+                ? documentData.documentNumber
+                    .replace(/[^0-9]/g, "")
+                    .match(/.{1,4}/g)
+                    ?.join(" ")
+                : "N/A"}
+            </p>
+          </div>
+          <div>
+            <label className="text-sm text-base-content/70">Name</label>
+            <p className="font-semibold mt-1">{documentData.name || "N/A"}</p>
+          </div>
+          <div>
+            <label className="text-sm text-base-content/70">
+              Date of Birth
+            </label>
+            <p className="font-semibold mt-1">
+              {formatDate(documentData.dateOfBirth)}
+            </p>
+          </div>
+          <div>
+            <label className="text-sm text-base-content/70">Gender</label>
+            <p className="font-semibold mt-1">{documentData.gender || "N/A"}</p>
+          </div>
+          <div>
+            <label className="text-sm text-base-content/70">Status</label>
+            <p className="font-semibold mt-1 capitalize">
+              {documentData.verificationStatus}
+            </p>
           </div>
         </div>
-
-        {/* Warning */}
-        {showWarning && (
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-            <div className="alert alert-warning shadow-lg">
-              <FiClock />
-              <span>Document will be hidden in 5 seconds</span>
-            </div>
-          </div>
-        )}
       </div>
+
+      {showWarning && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+          <div className="alert alert-warning shadow-lg">
+            <FiClock />
+            <span>Document will be hidden in 5 seconds</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

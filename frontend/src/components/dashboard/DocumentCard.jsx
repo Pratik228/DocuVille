@@ -147,24 +147,34 @@ const DocumentCard = ({ document }) => {
     );
   };
 
+  const renderDocumentView = () => {
+    if (showViewer && viewToken) {
+      return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
+          <DocumentView
+            document={document}
+            viewToken={viewToken}
+            onClose={() => {
+              setShowViewer(false);
+              setViewToken(null);
+            }}
+          />
+        </div>
+      );
+    }
+    return null;
+  };
+
   if (!document) return null;
 
-  if (showViewer && viewToken) {
-    return (
-      <DocumentView
-        document={document}
-        viewToken={viewToken}
-        onClose={() => {
-          setShowViewer(false);
-          setViewToken(null);
-        }}
-      />
-    );
-  }
-
   return (
-    <>
-      <div className="card bg-base-200 shadow-sm hover:shadow-md transition-all">
+    <div className="relative">
+      {renderDocumentView()}
+      <div
+        className={`card bg-base-200 shadow-sm hover:shadow-md transition-all ${
+          showViewer ? "opacity-0" : ""
+        }`}
+      >
         <div className="card-body p-4">
           <div className="flex justify-between items-start">
             <div>
@@ -246,7 +256,7 @@ const DocumentCard = ({ document }) => {
           onClose={() => setShowAdminVerify(false)}
         />
       )}
-    </>
+    </div>
   );
 };
 
