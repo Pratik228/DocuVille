@@ -28,11 +28,21 @@ exports.uploadDocument = async (req, res) => {
       console.log("Creating document with extracted data:", extractedData);
     }
 
+    // Log the document number before encryption for debugging purposes
+    console.log(
+      "Document number before encryption:",
+      extractedData.documentNumber
+    );
+
+    const documentNumberEncrypted = encryption.encrypt(
+      extractedData.documentNumber || "UNKNOWN-DOC"
+    );
+
     const document = new Document({
       userId: req.user.id,
       documentType: "aadharId",
       name: extractedData.name || "Unknown",
-      documentNumber: extractedData.documentNumber || "UNKNOWN-DOC",
+      documentNumber: documentNumberEncrypted,
       dateOfBirth: extractedData.dateOfBirth || extractedData.yearOfBirth,
       gender: extractedData.gender,
       documentImage: req.file.path,
@@ -45,9 +55,12 @@ exports.uploadDocument = async (req, res) => {
       },
     });
 
+    // Log the document details, showing the masked version of the document number
     console.log("Document before save:", {
       name: document.name,
-      documentNumber: document.documentNumber,
+      documentNumber: encryption.mask(
+        extractedData.documentNumber || "UNKNOWN-DOC"
+      ),
       dateOfBirth: document.dateOfBirth,
       gender: document.gender,
     });
@@ -237,8 +250,14 @@ exports.getDocumentWithToken = async (req, res) => {
       return res.status(404).json({ error: "Document not found" });
     }
 
-    // Decrypt document number but keep original number for display
-    const decryptedDocNumber = encryption.decrypt(document.documentNumber);
+    // Decrypt document number
+    let decryptedDocNumber = encryption.decrypt(document.documentNumber);
+    try {
+      decryptedDocNumber = encryption.decrypt(decryptedDocNumber); // Attempt second decryption
+    } catch (err) {
+      console.error("Double decryption failed:", err);
+    }
+    // Debug line
 
     res.json({
       success: true,

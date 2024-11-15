@@ -18,9 +18,15 @@ const documentSchema = new mongoose.Schema(
       required: true,
       set: function (number) {
         if (!number) return number;
-        return encryption.encrypt(number);
+        // Check if `number` is already encrypted to avoid double encryption
+        if (!number.includes(":")) {
+          // Assuming ":" is only present in encrypted values
+          return encryption.encrypt(number);
+        }
+        return number;
       },
     },
+
     name: {
       type: String,
       required: true,
@@ -88,6 +94,10 @@ documentSchema.methods.getDecryptedDocumentNumber = function () {
 documentSchema.pre("save", function (next) {
   if (this.documentNumber) {
     this.documentNumber = this.documentNumber.replace(/\s+/g, "");
+    // Prevent double encryption by ensuring it's encrypted only once
+    if (!this.documentNumber.includes(":")) {
+      this.documentNumber = encryption.encrypt(this.documentNumber);
+    }
   }
 
   if (this.gender) {

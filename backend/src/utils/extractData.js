@@ -17,6 +17,11 @@ const extractData = async (imagePath) => {
       .resize(2000, null)
       .sharpen()
       .normalize()
+      .grayscale()
+      .modulate({
+        brightness: 1.1,
+        contrast: 1.1,
+      })
       .toBuffer();
 
     console.log("Image processed, starting OCR");
@@ -24,6 +29,11 @@ const extractData = async (imagePath) => {
     const worker = await tesseract.createWorker();
     await worker.loadLanguage("eng+hin");
     await worker.initialize("eng+hin");
+    await worker.setParameters({
+      tessedit_char_whitelist:
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789- ",
+      preserve_interword_spaces: 1,
+    });
 
     const {
       data: { text },
@@ -32,45 +42,30 @@ const extractData = async (imagePath) => {
 
     await worker.terminate();
 
-    // Enhanced patterns with more variations
     const patterns = {
       documentNumber: [
         /\b(\d{4}\s?\d{4}\s?\d{4})\b/,
         /(\d{4}[\s-]?\d{4}[\s-]?\d{4})/,
-        /(\d{10})\b/, // Also match 10-digit numbers
+        /(\d{10})\b/,
       ],
       name: [
-        // More specific name patterns
-        /Name\s*:\s*([A-Z][A-Za-z\s]+?)(?=\s*(?:DOB|Gender|Year|Female|Male|\d{4}))/i,
-        /नाम\s*\/\s*Name\s*:\s*([A-Z][A-Za-z\s]+)/i,
-        /([A-Z][A-Za-z]+\s+[A-Z][A-Za-z]+)\s+(?=DOB|Gender|Year|Female|Male|\d{4})/,
-        /:\s*([A-Z][A-Za-z]+\s+[A-Z][A-Za-z]+)\s+(?=DOB|Gender|Year|Female|Male|\d{4})/,
+        /(?:Name|नाम)\s*[:\-]?\s*([A-Z][A-Za-z\s]+)/i,
+        /([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)+)/,
       ],
       dateOfBirth: [
-        // Date patterns
-        /DOB\s*:\s*(\d{4}-\d{2}-\d{2})/i,
-        /DOB\s*:\s*(\d{2}-\d{2}-\d{4})/i,
-        /(\d{4}-\d{2}-\d{2})/,
-        /(\d{2}-\d{2}-\d{4})/,
-        // Year only patterns
-        /Year of Birth\s*:?\s*(\d{4})/i,
-        /जन्म वर्ष\s*:?\s*(\d{4})/i,
-        // Extract just year if nothing else
+        /(?:DOB|जन्म तिथि)\s*[:\-]?\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4}|\d{4}\/\d{2}\/\d{2})/i,
         /\b(19\d{2}|20\d{2})\b/,
       ],
-      gender: [
-        /(?:Gender|लिंग)[:\s]*(Male|Female|पुरुष|महिला)/i,
-        /\b(Male|Female|पुरुष|महिला)\b/i,
-        /\b(MALE|FEMALE)\b/,
-      ],
+      gender: [/\b(Male|Female|पुरुष|महिला|MALE|FEMALE)\b/i],
     };
 
     const extracted = {};
+    const cleanedText = text
+      .replace(/\n+/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/Government Of India|GOVERNMENT OF INDIA/i, "")
+      .trim();
 
-    // Enhanced extraction with text preprocessing
-    const cleanedText = text.replace(/\n+/g, " ").replace(/\s+/g, " ").trim();
-
-    // Extract data with better handling
     Object.entries(patterns).forEach(([key, patternList]) => {
       let found = false;
       patternList.some((pattern) => {
@@ -82,20 +77,8 @@ const extractData = async (imagePath) => {
         }
         return false;
       });
-
-      // Fallback patterns for name
-      if (!found && key === "name") {
-        // Try to find any sequence of capital letters with spaces
-        const nameMatch = cleanedText.match(
-          /([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)+)/
-        );
-        if (nameMatch) {
-          extracted.name = nameMatch[1].trim();
-        }
-      }
     });
 
-    // Enhanced data cleaning
     if (extracted.name) {
       extracted.name = extracted.name
         .replace(/[^\w\s]/g, "")
@@ -105,6 +88,15 @@ const extractData = async (imagePath) => {
         )
         .join(" ")
         .trim();
+
+      extracted.name = extracted.name.replace(/\b(Fh|Dria|Dob)\b/g, "").trim();
+
+      // Additional check to remove 'Government Of India' if mistakenly matched
+      if (extracted.name.includes("Government Of India")) {
+        extracted.name = extracted.name
+          .replace("Government Of India", "")
+          .trim();
+      }
     }
 
     if (extracted.documentNumber) {
@@ -124,20 +116,12 @@ const extractData = async (imagePath) => {
     }
 
     if (extracted.dateOfBirth) {
-      if (extracted.dateOfBirth.length === 4) {
-        // Year only format
-        extracted.dateOfBirth = `01/01/${extracted.dateOfBirth}`;
-      } else {
-        const parts = extracted.dateOfBirth.split(/[-/.]/).map((p) => p.trim());
-        if (parts.length === 3) {
-          // Check if year is first or last
-          if (parts[0].length === 4) {
-            // YYYY-MM-DD format
-            extracted.dateOfBirth = `${parts[2]}/${parts[1]}/${parts[0]}`;
-          } else {
-            // DD-MM-YYYY format
-            extracted.dateOfBirth = `${parts[0]}/${parts[1]}/${parts[2]}`;
-          }
+      const parts = extracted.dateOfBirth.split(/[-/.]/).map((p) => p.trim());
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          extracted.dateOfBirth = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        } else {
+          extracted.dateOfBirth = `${parts[0]}/${parts[1]}/${parts[2]}`;
         }
       }
     }

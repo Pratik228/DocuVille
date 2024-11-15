@@ -28,13 +28,14 @@ const DocumentView = ({ document, onClose }) => {
         return format(new Date(dateString), "dd MMM yyyy");
       }
 
-      if (dateString.includes("-")) {
-        const [year, month, day] = dateString.split("-");
+      if (dateString.includes("/")) {
+        const [month, day, year] = dateString.split("/");
         return format(new Date(year, month - 1, day), "dd MMM yyyy");
       }
 
-      if (dateString.includes("/")) {
-        const [day, month, year] = dateString.split("/");
+      // Handle YYYY-MM-DD format
+      if (dateString.includes("-")) {
+        const [year, month, day] = dateString.split("-");
         return format(new Date(year, month - 1, day), "dd MMM yyyy");
       }
 

@@ -74,9 +74,10 @@ const DocumentCard = ({ document }) => {
   const [showViewer, setShowViewer] = useState(false);
   const [viewToken, setViewToken] = useState(null);
   const [showAdminVerify, setShowAdminVerify] = useState(false);
-  const maskedNumber = document?.documentNumber
-    ? `XXXX-${document.documentNumber.slice(-4)}`
-    : "XXXX-XXXX";
+  const maskedNumber =
+    viewToken && document?.documentNumber
+      ? document.documentNumber
+      : `XXXX-${document.documentNumber.slice(-4)}`;
 
   const handleViewRequest = async () => {
     try {
