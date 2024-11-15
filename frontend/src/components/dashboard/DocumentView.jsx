@@ -50,11 +50,19 @@ const DocumentView = ({ document, viewToken, onClose }) => {
       if (!dateString) return "N/A";
       if (/^\d{4}$/.test(dateString)) return dateString;
       if (dateString.includes("/")) {
-        const [day, month, year] = dateString.split("/");
+        const [month, day, year] = dateString.split("/");
         return format(new Date(year, month - 1, day), "dd MMM yyyy");
       }
-      return format(new Date(dateString), "dd MMM yyyy");
+
+      // Handle YYYY-MM-DD format
+      if (dateString.includes("-")) {
+        const [year, month, day] = dateString.split("-");
+        return format(new Date(year, month - 1, day), "dd MMM yyyy");
+      }
+
+      return dateString;
     } catch (error) {
+      console.error("Date formatting error:", error);
       return dateString;
     }
   };
