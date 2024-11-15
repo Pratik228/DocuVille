@@ -42,30 +42,14 @@ const DocumentView = ({ document, viewToken, onClose }) => {
   const formatDate = (dateString) => {
     try {
       if (!dateString) return "N/A";
-
-      // If it's just a year
-      if (/^\d{4}$/.test(dateString)) {
-        return dateString;
-      }
-
-      // If it's already in a readable format
-      if (dateString.includes("GMT") || dateString.includes("UTC")) {
-        return format(new Date(dateString), "dd MMM yyyy");
-      }
-
-      if (dateString.includes("-")) {
-        const [year, month, day] = dateString.split("-");
-        return format(new Date(year, month - 1, day), "dd MMM yyyy");
-      }
-
+      if (/^\d{4}$/.test(dateString)) return dateString;
       if (dateString.includes("/")) {
         const [day, month, year] = dateString.split("/");
         return format(new Date(year, month - 1, day), "dd MMM yyyy");
       }
-
-      return dateString;
+      return format(new Date(dateString), "dd MMM yyyy");
     } catch (error) {
-      console.error("Date formatting error:", error);
+      console.log(error);
       return dateString;
     }
   };
@@ -101,7 +85,7 @@ const DocumentView = ({ document, viewToken, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-base-100 rounded-lg w-full max-w-2xl">
+      <div className="bg-base-100 rounded-lg w-full max-w-lg">
         <div className="p-4 border-b flex justify-between items-center">
           <h3 className="text-lg font-semibold">Document Details</h3>
           <div className="flex items-center gap-4">
@@ -123,71 +107,51 @@ const DocumentView = ({ document, viewToken, onClose }) => {
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6">
           <div
-            className={`grid grid-cols-2 gap-6 ${isBlurred ? "blur-md" : ""}`}
+            className={`grid grid-cols-2 gap-x-8 gap-y-4 ${
+              isBlurred ? "blur-md" : ""
+            }`}
           >
             <div>
               <label className="text-sm text-base-content/70">
                 Document Type
               </label>
-              <p className="font-semibold">Aadhar Card</p>
+              <p className="font-semibold mt-1">Aadhar Card</p>
             </div>
             <div>
               <label className="text-sm text-base-content/70">
                 Document Number
               </label>
-              <p className="font-semibold">{documentData.documentNumber}</p>
+              <p className="font-semibold mt-1">
+                {documentData.documentNumber}
+              </p>
             </div>
             <div>
               <label className="text-sm text-base-content/70">Name</label>
-              <p className="font-semibold">{documentData.name || "N/A"}</p>
+              <p className="font-semibold mt-1">{documentData.name || "N/A"}</p>
             </div>
             <div>
               <label className="text-sm text-base-content/70">
                 Date of Birth
               </label>
-              <p className="font-semibold">
+              <p className="font-semibold mt-1">
                 {formatDate(documentData.dateOfBirth)}
               </p>
             </div>
             <div>
               <label className="text-sm text-base-content/70">Gender</label>
-              <p className="font-semibold">{documentData.gender || "N/A"}</p>
+              <p className="font-semibold mt-1">
+                {documentData.gender || "N/A"}
+              </p>
             </div>
             <div>
               <label className="text-sm text-base-content/70">Status</label>
-              <p className="font-semibold capitalize">
+              <p className="font-semibold mt-1 capitalize">
                 {documentData.verificationStatus}
               </p>
             </div>
           </div>
-
-          {documentData.documentImage && (
-            <div
-              className={`relative aspect-[3/4] bg-base-200 rounded-lg overflow-hidden ${
-                isBlurred ? "blur-md" : ""
-              }`}
-            >
-              <img
-                src={documentData.documentImage}
-                alt="Document"
-                className="w-full h-full object-contain"
-              />
-            </div>
-          )}
-
-          {documentData.extractedData &&
-            Object.keys(documentData.extractedData).length > 0 && (
-              <div className={isBlurred ? "blur-md" : ""}>
-                <label className="text-sm text-base-content/70 block mb-2">
-                  Extracted Information
-                </label>
-                <pre className="bg-base-200 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
-                  {JSON.stringify(documentData.extractedData, null, 2)}
-                </pre>
-              </div>
-            )}
         </div>
 
         {showWarning && (
